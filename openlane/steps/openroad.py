@@ -1118,6 +1118,22 @@ class TapEndcapInsertion(OpenROADStep):
         return os.path.join(get_script_dir(), "openroad", "tapcell.tcl")
 
 
+@Step.factory.register()
+class UnplaceAll(OpenROADStep):
+    """
+    Sets placement status of *all* instances to NONE.
+
+    Useful in flows where a preliminary placement is needed as a pre-requisite
+    to something else but that placement must be discarded.
+    """
+
+    id = "OpenROAD.UnplaceAll"
+    name = "Unplace All"
+
+    def get_script_path(self):
+        return os.path.join(get_script_dir(), "openroad", "ungpl.tcl")
+
+
 def get_psm_error_count(rpt: io.TextIOWrapper) -> int:
     sio = io.StringIO()
 
@@ -1331,29 +1347,142 @@ class GlobalPlacementSkipIO(_GlobalPlacement):
 
 
 @Step.factory.register()
-class BasicMacroPlacement(OpenROADStep):
-    id = "OpenROAD.BasicMacroPlacement"
-    name = "Basic Macro Placement"
+class HierarchicalMacroPlacer(OpenROADStep):
+    """
+    Uses the *Hier-RTLMP* automatic macro placer in OpenROAD to place any
+    unplaced macros.
+
+    This placer is aimed at complex top-level IP integrations where hierarchy
+    information from the register-transfer level could be leveraged.
+
+    This requires the netlist to keep hierarchy information. OpenLane 2's
+    Classic flow does not do so by default, see ``Yosys.Synthesis``'s
+    documentation on how to alter that.
+
+    See this paper for more info: https://arxiv.org/pdf/2304.11761
+    """
+
+    id = "OpenROAD.HierarchicalMacroPlacer"
+    name = "Hierarchical Macro Placement"
 
     config_vars = OpenROADStep.config_vars + [
         Variable(
-            "PL_MACRO_HALO",
-            str,
-            "Macro placement halo. Format: `{Horizontal} {Vertical}`.",
-            default="0 0",
+            "FP_MACRO_HORIZONTAL_HALO",
+            Decimal,
+            "Specify the horizontal halo size around macros.",
+            default=5,
+            units="µm",
+            deprecated_names=["FP_TAP_HORIZONTAL_HALO"],
+        ),
+        Variable(
+            "FP_MACRO_VERTICAL_HALO",
+            Decimal,
+            "Specify the horizontal halo size around macros.",
+            default=5,
+            units="µm",
+            deprecated_names=["FP_TAP_VERTICAL_HALO"],
+        ),
+        # Variable(
+        #     "PL_MACRO_CHANNEL",
+        #     Tuple[Decimal, Decimal],
+        #     "'Halo' (i.e. space left empty) around macros placed using the hierarchical macro placement. Tuple of horizontal and vertical values.",
+        #     default=(Decimal("0"), Decimal("0")),
+        #     units="µm",
+        # ),
+        Variable(
+            "RTLMP_MAX_LEVEL",
+            Optional[int],
+            "Maximum depth of the physical hierarchical tree.",
+        ),
+        Variable(
+            "RTLMP_MAX_INST",
+            Optional[int],
+            "Maximum number of standard cells in a cluster.",
+        ),
+        Variable(
+            "RTLMP_MIN_INST",
+            Optional[int],
+            "Minimum number of standard cells in a cluster.",
+        ),
+        Variable(
+            "RTLMP_MAX_MACRO",
+            Optional[int],
+            "Maximum number of macros in a cluster.",
+        ),
+        Variable(
+            "RTLMP_MIN_MACRO",
+            Optional[int],
+            "Minimum number of macros in a cluster.",
+        ),
+        Variable(
+            "RTLMP_MIN_AR",
+            Decimal,
+            "Minimum aspect ratio of a StandardCellCluster.",
+            default=Decimal("0.33"),
+        ),
+        Variable(
+            "RTLMP_SIGNATURE_NET_THRESHOLD",
+            Optional[int],
+            "Minimum number of connections between two clusters to be identified as connected.",
+        ),
+        Variable(
+            "RTLMP_AREA_WT",
+            Optional[Decimal],
+            "Weight for the area of the current floorplan.",
+        ),
+        Variable(
+            "RTLMP_WIRELENGTH_WT",
+            Optional[Decimal],
+            "Weight for half-perimeter wirelength.",
+        ),
+        Variable(
+            "RTLMP_OUTLINE_WT",
+            Optional[Decimal],
+            "Weight for violating the fixed outline constraint.",
+        ),
+        Variable(
+            "RTLMP_BOUNDARY_WT",
+            Optional[Decimal],
+            "Weight for the boundary, or how far the hard macro clusters are from boundaries.",
+        ),
+        Variable(
+            "RTLMP_NOTCH_WT",
+            Optional[Decimal],
+            "Weight for the notch, or the existence of dead space that cannot be used for placement & routing.",
+        ),
+        Variable(
+            "RTLMP_DEAD_SPACE",
+            Optional[Decimal],
+            "Specifies the target dead space percentage.",
+        ),
+        Variable(
+            "RTLMP_FENCE_LX",
+            Optional[Decimal],
+            "Lower X coordinate of the global fence bounding box.",
             units="µm",
         ),
         Variable(
-            "PL_MACRO_CHANNEL",
-            str,
-            "Channel widths between macros. Format: `{Horizontal} {Vertical}`.",
-            default="0 0",
+            "RTLMP_FENCE_LY",
+            Optional[Decimal],
+            "Lower Y coordinate of the global fence bounding box.",
+            units="µm",
+        ),
+        Variable(
+            "RTLMP_FENCE_UX",
+            Optional[Decimal],
+            "Upper X coordinate of the global fence bounding box.",
+            units="µm",
+        ),
+        Variable(
+            "RTLMP_FENCE_UY",
+            Optional[Decimal],
+            "Upper Y coordinate of the global fence bounding box.",
             units="µm",
         ),
     ]
 
     def get_script_path(self):
-        raise NotImplementedError()
+        return os.path.join(get_script_dir(), "openroad", "hiertlmp.tcl")
 
 
 @Step.factory.register()
