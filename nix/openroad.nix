@@ -43,8 +43,8 @@
   clang-tools_14,
   buildEnv,
   makeBinaryWrapper,
-  rev ? "edf00dff99f6c40d67a30c0e22a8191c5d2ed9d6",
-  sha256 ? "sha256-J649SIC/IHtiKiMvY8XrteyFkNM0WeQ6hfKIYdtE81g=",
+  rev ? "4d5e9327187327ef1f3ec91fa8f031a1c3db6d68",
+  sha256 ? "sha256-F0gnZYdvngx9Dg7ldsGA3Fvyb/45A+bMvIBPG8OoAFA=",
   # environments,
   openroad,
   buildPythonEnvForInterpreter,
@@ -54,7 +54,7 @@
     inherit rev;
 
     src = fetchFromGitHub {
-      owner = "The-OpenROAD-Project";
+      owner = "qwertxzy";
       repo = "OpenROAD";
       inherit rev;
       inherit sha256;
