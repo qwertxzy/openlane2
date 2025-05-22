@@ -24,7 +24,7 @@
   };
 
   inputs = {
-    nix-eda.url = github:efabless/nix-eda;
+    nix-eda.url = github:efabless/nix-eda/2.1.2;
     libparse.url = github:efabless/libparse-python;
     ioplace-parser.url = github:efabless/ioplace_parser;
     volare.url = github:efabless/volare;
@@ -33,7 +33,7 @@
   };
 
   inputs.libparse.inputs.nixpkgs.follows = "nix-eda/nixpkgs";
-  inputs.ioplace-parser.inputs.nixpkgs.follows = "nix-eda/nixpkgs";
+  inputs.ioplace-parser.inputs.nix-eda.follows = "nix-eda";
   inputs.volare.inputs.nixpkgs.follows = "nix-eda/nixpkgs";
   inputs.devshell.inputs.nixpkgs.follows = "nix-eda/nixpkgs";
 
@@ -56,6 +56,14 @@
         (nix-eda.flakesToOverlay [libparse ioplace-parser volare])
         (pkgs': pkgs: {
           yosys-sby = (pkgs.yosys-sby.override { sha256 = "sha256-Il2pXw2doaoZrVme2p0dSUUa8dCQtJJrmYitn1MkTD4="; });
+          klayout = (pkgs.klayout.overrideAttrs(old: {
+            configurePhase = builtins.replaceStrings ["-without-qtbinding"] ["-with-qtbinding"] old.configurePhase;
+          }));
+          yosys = pkgs.yosys.overrideAttrs(old: {
+            patches = old.patches ++ [
+              ./nix/patches/yosys/async_rules.patch
+            ];
+          });
         })
         (
           pkgs': pkgs: let

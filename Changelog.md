@@ -13,6 +13,147 @@
 ## API Breaks
 ## Documentation
 -->
+
+# 2.3.10
+
+## Steps
+
+* `Yosys.Synthesis`
+  * `SYNTH_ELABORATE_FLATTEN` now passes the `-noscopeinfo` flag so scopeinfo
+    cells are no longer emitted from Synthesis.
+
+# 2.3.9
+
+## Tool Updates
+
+* Backported https://github.com/The-OpenROAD-Project/OpenROAD/pull/6743 to
+  OpenROAD to fix GUI crashes on C++ standard libraries that are not libstdc++
+  (aka: macOS.)
+
+# 2.3.8
+
+## Misc. Enhancements/Bugfixes
+
+* Fixed substitutions in `config.json` being applied to all flows. It now only
+  applies to the flow in meta.flow (which falls back to `Classic` if it's null.)
+  
+# 2.3.7
+
+## Tool Updates
+
+* Updated Docker requirement to tested version: 27.3.1
+  * Added warning when Docker version is out of date.
+
+## Documentation
+
+* Updated documentation to reflect tested Docker version.
+* Updated documentation to stop using a branch of the DetSys Nix Installer.
+
+# 2.3.6
+
+## Steps
+
+* `Verilator.Lint`
+  * Fixed missing `VERILOG_INCLUDE_DIRS` variable, which would cause designs
+    that synthesize correctly to otherwise fail linting.
+
+# 2.3.5
+
+## Tool Updates
+
+* `nix-eda` updated to 2.1.2
+  * Pulls in a Python overlay fix and a fix for `gdstk`.
+
+# 2.3.4
+
+## Tool Updates
+
+* Added patch to Yosys to resolve an early return issue that broke non-const
+  asynchronous resets. See https://github.com/YosysHQ/yosys/issues/4712 for more
+  info.
+
+# 2.3.3
+
+## Steps
+
+* `OpenROAD.Floorplan`
+
+  * Fixed an issue in `FP_SIZING`: `absolute` mode where if the die area's x0 >
+    x1 or y0 > y1, the computed core area would no longer fit in the die area.
+    Not that we recommend you ever do that, but technically OpenROAD allows it.
+
+# 2.3.2
+
+## Steps
+
+* `Yosys.*`
+  * Fixed blackbox Verilog and lib models causing a crash if they are gzipped
+    and/or have the extension `.gz`.
+
+## Tool Updates
+
+* Relaxed requirement on `httpx` to include `0.28.X`, which has no removals
+  compared to `0.27.0`.
+
+## Documentation
+
+* Clarified support for gzipped files in the Classic flow.
+
+# 2.3.1
+
+## Tool Updates
+
+* KLayout now compiled with `-qt-binding`, which increases distribution size but
+  allows for more features.
+
+# 2.3.0
+
+## Steps
+
+* `OpenROAD.GlobalPlacement`
+
+  * Exposed `-routability_check_overflow` argument as new variable
+    `PL_ROUTABILITY_OVERFLOW_THRESHOLD`.
+
+* `Yosys.*Synthesis`
+
+  * Created new variable `SYNTH_HIERARCHY_MODE`, replacing `SYNTH_NO_FLAT`.
+    There are three options, `flatten`, `deferred_flatten` and `keep`. The first
+    two correspond to `SYNTH_NO_FLAT` being false and true respectively. The
+    third keeps the hierarchy in the final netlist.
+  * Created new variable `SYNTH_TIE_UNDEFINED` to customize whether undefined
+    and undriven values are tied low, high, or left as-is.
+  * Created new variable `SYNTH_WRITE_NOATTR` to allow attributes to be
+    propagated to the final netlist.
+
+* Created `Yosys.Resynthesis`
+
+  * Like `Yosys.Synthesis`, but uses the current input state netlist as an input
+    instead of RTL files
+
+## CLI
+
+* Added new option: `-e`/`--initial-state-element-override`: allows an element
+  in the initial state to be overridden straight from the commandline.
+
+# 2.2.9
+
+## Steps
+
+* `Yosys.JsonHeader`, `Yosys.Synthesis`
+
+  * Fixed `VERILOG_INCLUDE_DIRS` being a list of strings instead of a list of
+    `Path`s.
+
+# 2.2.8
+
+## Steps
+
+* `Checker.*Violations`
+
+  * Changed `TIMING_VIOLATION_CORNERS` to a PDK variable to avoid breaking PDKs
+    without `tt` in corner names.
+
 # 2.2.7
 
 ## Steps
@@ -27,13 +168,13 @@
 
 * `OpenROAD.ResizerTimingPostGRT`
 
-  * Fixed `GRT_RESIZER_GATE_CLONING` incorrectly applied to hold fixing instead 
-  of setup fixing.
+  * Fixed `GRT_RESIZER_GATE_CLONING` incorrectly applied to hold fixing instead
+    of setup fixing.
 
 * `OpenROAD.ResizerTimingPostCTS`
 
-  * Fixed `PL_RESIZER_GATE_CLONING` incorrectly applied to hold fixing instead 
-  of setup fixing.
+  * Fixed `PL_RESIZER_GATE_CLONING` incorrectly applied to hold fixing instead
+    of setup fixing.
 
 # 2.2.5
 
