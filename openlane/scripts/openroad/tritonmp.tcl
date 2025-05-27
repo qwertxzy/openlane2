@@ -1,4 +1,4 @@
-# Copyright 2023 Efabless Corporation
+# Copyright 2020-2022 Efabless Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,9 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-# flake8: noqa
-from .optimizing import Optimizing
-from .classic import Classic, VHDLClassic
-from .misc import OpenInKLayout, OpenInOpenROAD
-from .synth_explore import SynthesisExploration
-from .autoplace import TritonMP
+source $::env(SCRIPTS_DIR)/openroad/common/io.tcl
+read_current_odb
+
+macro_placement\
+    -channel "$::env(FP_MACRO_HORIZONTAL_HALO) $::env(FP_MACRO_VERTICAL_HALO)" \
+    -halo "$::env(FP_MACRO_HORIZONTAL_CHANNEL) $::env(FP_MACRO_VERTICAL_CHANNEL)"
+
+write_views
+
+report_design_area_metrics
+

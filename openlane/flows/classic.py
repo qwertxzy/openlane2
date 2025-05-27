@@ -62,7 +62,7 @@ class Classic(SequentialFlow):
         Odb.CustomIOPlacement,
         Odb.ApplyDEFTemplate,
         Odb.ManualMacroPlacement,
-        OpenROAD.HierarchicalMacroPlacer,
+        # OpenROAD.HierarchicalMacroPlacer,
         OpenROAD.CutRows,
         OpenROAD.TapEndcapInsertion,
         Odb.AddPDNObstructions,

@@ -1100,7 +1100,7 @@ class TapEndcapInsertion(OpenROADStep):
             "FP_MACRO_HORIZONTAL_HALO",
             Decimal,
             "Specify the horizontal halo size around macros while cutting rows.",
-            default=10,
+            default=5,
             units="µm",
             deprecated_names=["FP_TAP_HORIZONTAL_HALO"],
         ),
@@ -1108,7 +1108,7 @@ class TapEndcapInsertion(OpenROADStep):
             "FP_MACRO_VERTICAL_HALO",
             Decimal,
             "Specify the vertical halo size around macros while cutting rows.",
-            default=10,
+            default=5,
             units="µm",
             deprecated_names=["FP_TAP_VERTICAL_HALO"],
         ),
@@ -1132,6 +1132,21 @@ class UnplaceAll(OpenROADStep):
 
     def get_script_path(self):
         return os.path.join(get_script_dir(), "openroad", "ungpl.tcl")
+    
+@Step.factory.register()
+class UnplaceStdCells(OpenROADStep):
+    """
+    Sets placement status of standard cell instances to NONE.
+
+    Needed for TritonMP where it requires a global placement but GPL
+    needs to run later in the flow again.
+    """
+
+    id = "OpenROAD.UnplaceStdCells"
+    name = "Unplace StdCells"
+
+    def get_script_path(self):
+        return os.path.join(get_script_dir(), "openroad", "unplace_stdcells.tcl")
 
 
 def get_psm_error_count(rpt: io.TextIOWrapper) -> int:
@@ -1350,6 +1365,51 @@ class GlobalPlacementSkipIO(_GlobalPlacement):
         env["__PL_SKIP_IO"] = "1"
         return super().run(state_in, env=env, **kwargs)
 
+@Step.factory.register()
+class TritonMacroPlacer(OpenROADStep):
+    """
+    Uses the *TritonMacroPlacer* automatic macro placer in OpenROAD to place any
+    unplaced macros.
+    """
+
+    id = "OpenROAD.TritonMacroPlacer"
+    name = "Triton Macro Placement"
+
+    config_vars = OpenROADStep.config_vars + [
+        Variable(
+            "FP_MACRO_HORIZONTAL_HALO",
+            Decimal,
+            "Specify the horizontal halo size around macros.",
+            default=5,
+            units="µm",
+            deprecated_names=["FP_TAP_HORIZONTAL_HALO"],
+        ),
+        Variable(
+            "FP_MACRO_VERTICAL_HALO",
+            Decimal,
+            "Specify the horizontal halo size around macros.",
+            default=5,
+            units="µm",
+            deprecated_names=["FP_TAP_VERTICAL_HALO"],
+        ),
+        Variable(
+            "FP_MACRO_HORIZONTAL_CHANNEL",
+            Decimal,
+            "Specify the horizontal channel size around macros.",
+            default=0,
+            units="µm"
+        ),
+        Variable(
+            "FP_MACRO_VERTICAL_CHANNEL",
+            Decimal,
+            "Specify the vertical channel size around macros.",
+            default=0,
+            units="µm"
+        )
+    ]
+
+    def get_script_path(self):
+        return os.path.join(get_script_dir(), "openroad", "tritonmp.tcl")
 
 @Step.factory.register()
 class HierarchicalMacroPlacer(OpenROADStep):
@@ -2047,7 +2107,7 @@ class CutRows(OpenROADStep):
             "FP_MACRO_HORIZONTAL_HALO",
             Decimal,
             "Specify the horizontal halo size around macros while cutting rows.",
-            default=10,
+            default=5,
             units="µm",
             deprecated_names=["FP_TAP_HORIZONTAL_HALO"],
         ),
@@ -2055,7 +2115,7 @@ class CutRows(OpenROADStep):
             "FP_MACRO_VERTICAL_HALO",
             Decimal,
             "Specify the vertical halo size around macros while cutting rows.",
-            default=10,
+            default=5,
             units="µm",
             deprecated_names=["FP_TAP_VERTICAL_HALO"],
         ),

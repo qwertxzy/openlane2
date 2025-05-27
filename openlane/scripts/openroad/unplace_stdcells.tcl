@@ -1,4 +1,4 @@
-# Copyright 2020-2022 Efabless Corporation
+# Copyright 2024 Efabless Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,11 +14,6 @@
 source $::env(SCRIPTS_DIR)/openroad/common/io.tcl
 read_current_odb
 
-macro_placement\
-    -channel $::env(PL_MACRO_CHANNEL)\
-    -halo $::env(PL_MACRO_HALO)
+mpl2::unplace_std_cells
 
 write_views
-
-report_design_area_metrics
-
