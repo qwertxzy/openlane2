@@ -1364,6 +1364,36 @@ class GlobalPlacementSkipIO(_GlobalPlacement):
             return {}, {}
         env["__PL_SKIP_IO"] = "1"
         return super().run(state_in, env=env, **kwargs)
+@Step.factory.register()
+class LegalizeMacroPlacement(OpenROADStep):
+    """
+    Legalizes the currently existing macro placement (after gpl for example)
+    """
+
+    id = "OpenROAD.MacroLegalizer"
+    name = "Macro Legalization"
+
+    config_vars = OpenROADStep.config_vars + [
+        Variable(
+            "FP_MACRO_HORIZONTAL_HALO",
+            Decimal,
+            "Specify the horizontal halo size around macros.",
+            default=5,
+            units="µm",
+            deprecated_names=["FP_TAP_HORIZONTAL_HALO"],
+        ),
+        Variable(
+            "FP_MACRO_VERTICAL_HALO",
+            Decimal,
+            "Specify the horizontal halo size around macros.",
+            default=5,
+            units="µm",
+            deprecated_names=["FP_TAP_VERTICAL_HALO"],
+        )
+    ]
+
+    def get_script_path(self):
+        return os.path.join(get_script_dir(), "openroad", "legalizemp.tcl")
 
 @Step.factory.register()
 class TritonMacroPlacer(OpenROADStep):
