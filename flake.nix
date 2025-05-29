@@ -30,6 +30,7 @@
     volare.url = github:efabless/volare;
     devshell.url = github:numtide/devshell;
     flake-compat.url = "https://flakehub.com/f/edolstra/flake-compat/1.tar.gz";
+    nixpkgs-main.url = "github:NixOS/nixpkgs/nixos-25.05";
   };
 
   inputs.libparse.inputs.nixpkgs.follows = "nix-eda/nixpkgs";
@@ -44,6 +45,7 @@
     ioplace-parser,
     volare,
     devshell,
+    nixpkgs-main,
     ...
   }: let
     nixpkgs = nix-eda.inputs.nixpkgs;
@@ -64,15 +66,41 @@
               ./nix/patches/yosys/async_rules.patch
             ];
           });
+          gcc14 = pkgs.gcc14;
         })
         (
           pkgs': pkgs: let
+            nixpkgs-main-pkgs = import nixpkgs-main { 
+              inherit (pkgs) system; 
+              overlays = [
+                (final: prev: {
+                  # or-tools needs SCIP support for the rtl macro placer, which isn't present by default
+                  or-tools = prev.or-tools.overrideAttrs (finalAttrs: previousAttrs: {
+                    cmakeFlags = previousAttrs.cmakeFlags or [] ++ [
+                      "-DUSE_SCIP=ON"
+                      "-DSCIP_ROOT=${final.scipopt-scip}"
+                      "-DCMAKE_CXX_STANDARD=17"
+                    ];
+                    
+                    # Having format strings of raw c strings throws an error now, so replace f(str) with f("%s", str)
+                    preConfigure = ''
+                      sed -i 's/SCIPerrorMessage(gresult\.status()\.ToString()\.c_str())/SCIPerrorMessage("%s", gresult.status().ToString().c_str())/g' ortools/gscip/gscip_constraint_handler.cc
+                    '';
+                  });
+                })
+              ];
+            };
             callPackage = lib.callPackageWith pkgs';
           in {
             colab-env = callPackage ./nix/colab-env.nix {};
             opensta = callPackage ./nix/opensta.nix {};
             openroad-abc = callPackage ./nix/openroad-abc.nix {};
-            openroad = callPackage ./nix/openroad.nix {};
+            openroad = callPackage ./nix/openroad.nix {
+              scipopt-scip = nixpkgs-main-pkgs.scipopt-scip;
+              or-tools = nixpkgs-main-pkgs.or-tools;
+            };
+
+            or-tools = nixpkgs-main-pkgs.or-tools;
           }
         )
         (

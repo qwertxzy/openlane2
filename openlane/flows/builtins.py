@@ -16,4 +16,4 @@ from .optimizing import Optimizing
 from .classic import Classic, VHDLClassic
 from .misc import OpenInKLayout, OpenInOpenROAD
 from .synth_explore import SynthesisExploration
-from .autoplace import TritonMP
+from .autoplace import TritonMP, HierRTLMP

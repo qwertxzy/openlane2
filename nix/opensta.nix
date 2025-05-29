@@ -13,7 +13,8 @@
 # limitations under the License.
 {
   lib,
-  clangStdenv,
+  stdenv,
+  gcc14,
   fetchFromGitHub,
   swig,
   pkg-config,
@@ -29,9 +30,13 @@
   rev ? "f71b38bbcecc8ddda3def4c24462522ff72f96ca",
   sha256 ? "sha256-j5IByNmN82Sv1vYpnbekqamnyEMNbLwS+RrioUYTWOo=",
 }:
-clangStdenv.mkDerivation (finalAttrs: {
+stdenv.mkDerivation (finalAttrs: {
   name = "opensta";
   inherit rev;
+
+  # Force use of GCC
+  # strictDeps = true;
+  NIX_CFLAGS_COMPILE = "-B${gcc14}/bin";
 
   src = fetchFromGitHub {
     owner = "The-OpenROAD-Project";
@@ -41,7 +46,7 @@ clangStdenv.mkDerivation (finalAttrs: {
   };
 
   cmakeFlags = [
-    "-DTCL_LIBRARY=${tcl}/lib/libtcl${clangStdenv.hostPlatform.extensions.sharedLibrary}"
+    "-DTCL_LIBRARY=${tcl}/lib/libtcl${stdenv.hostPlatform.extensions.sharedLibrary}"
     "-DTCL_HEADER=${tcl}/include/tcl.h"
   ];
 
@@ -71,6 +76,7 @@ clangStdenv.mkDerivation (finalAttrs: {
   '';
 
   nativeBuildInputs = [
+    gcc14
     swig
     pkg-config
     cmake

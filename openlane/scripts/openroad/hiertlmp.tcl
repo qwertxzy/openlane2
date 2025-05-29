@@ -47,6 +47,26 @@
 source $::env(SCRIPTS_DIR)/openroad/common/io.tcl
 read_current_odb
 
+proc find_unfixed_macros {} {
+    set macros [list]
+
+    foreach inst [$::block getInsts] {
+        set inst_master [$inst getMaster]
+
+        # BLOCK means MACRO cells
+        if { ![string match [$inst_master getType] "BLOCK"] } {
+            continue
+        }
+
+        if { [$inst isFixed] } {
+            continue
+        }
+
+        lappend macros $inst
+    }
+    return $macros
+}
+
 if { [llength [find_unfixed_macros]] } {
     report_design_area_metrics
     set rtlmp_args [list]
@@ -112,7 +132,8 @@ if { [llength [find_unfixed_macros]] } {
         lappend rtlmp_args -fence_uy $::env(RTLMP_FENCE_UY)
     }
 
-    log_cmd rtl_macro_placer {*}$rtlmp_args
+    puts $rtlmp_args
+    rtl_macro_placer {*}$rtlmp_args
 } else {
     puts "\[INFO\] No macro instances found that are not 'FIXED'."
 }

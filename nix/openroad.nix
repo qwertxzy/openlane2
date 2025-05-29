@@ -13,7 +13,8 @@
 # limitations under the License.
 {
   lib,
-  clangStdenv,
+  stdenv,
+  gcc14,
   fetchFromGitHub,
   openroad-abc,
   libsForQt5,
@@ -29,6 +30,7 @@
   libffi,
   llvmPackages,
   lemon-graph,
+  scipopt-scip,
   or-tools,
   glpk,
   zlib,
@@ -40,7 +42,6 @@
   gnumake,
   flex,
   bison,
-  clang-tools_14,
   buildEnv,
   makeBinaryWrapper,
   rev ? "4d5e9327187327ef1f3ec91fa8f031a1c3db6d68",
@@ -49,9 +50,13 @@
   openroad,
   buildPythonEnvForInterpreter,
 }: let
-  self = clangStdenv.mkDerivation (finalAttrs: {
+  self = stdenv.mkDerivation (finalAttrs: {
     name = "openroad";
     inherit rev;
+
+    # Force use of GCC
+    # strictDeps = true;
+    NIX_CFLAGS_COMPILE = "-B${gcc14}/bin";
 
     src = fetchFromGitHub {
       owner = "qwertxzy";
@@ -65,7 +70,7 @@
     ];
 
     cmakeFlagsAll = [
-      "-DTCL_LIBRARY=${tcl}/lib/libtcl${clangStdenv.hostPlatform.extensions.sharedLibrary}"
+      "-DTCL_LIBRARY=${tcl}/lib/libtcl${stdenv.hostPlatform.extensions.sharedLibrary}"
       "-DTCL_HEADER=${tcl}/include/tcl.h"
       "-DUSE_SYSTEM_BOOST:BOOL=ON"
       "-DCMAKE_CXX_FLAGS=-I${openroad-abc}/include"
@@ -108,8 +113,8 @@
       libsForQt5.qtbase
       libsForQt5.qt5.qtcharts
       llvmPackages.openmp
-
       lemon-graph
+      scipopt-scip
       or-tools
       opensta
       glpk
@@ -120,6 +125,7 @@
     ];
 
     nativeBuildInputs = [
+      gcc14
       swig4
       pkg-config
       python3.pkgs.cmake # TODO: Replace with top-level cmake, I'm just doing this to avoid a rebuild
@@ -127,7 +133,6 @@
       flex
       bison
       libsForQt5.wrapQtAppsHook
-      clang-tools_14
     ];
 
     shellHook = ''
