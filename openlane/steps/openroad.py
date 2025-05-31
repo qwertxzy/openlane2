@@ -1117,7 +1117,6 @@ class TapEndcapInsertion(OpenROADStep):
     def get_script_path(self):
         return os.path.join(get_script_dir(), "openroad", "tapcell.tcl")
 
-
 @Step.factory.register()
 class UnplaceAll(OpenROADStep):
     """
@@ -1159,11 +1158,15 @@ def get_psm_error_count(rpt: io.TextIOWrapper) -> int:
             vio_type = line[len(VIO_TYPE_PFX) :].strip()
             sio.write(f"- type: {vio_type}\n")
         elif "bbox = " in line:
-            sio.write(line.replace("bbox = ", "- bbox ="))
+            sio.write(line.replace("\tbbox = ", "  bbox: "))
         else:
+            # Sanitize the lines by replacing all but first ':' with a '='
+            parts = line.split(':')
+            line = f"  {parts[0].strip()}:{'='.join(parts[1:])}"
             sio.write(line)
 
     sio.seek(0)
+
     violations = yaml.load(sio, Loader=yaml.SafeLoader) or []
     return functools.reduce(
         lambda acc, current: acc + len(current["srcs"]), violations, 0
