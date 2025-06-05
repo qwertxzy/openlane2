@@ -44,11 +44,10 @@ class TritonMP(SequentialFlow):
       OpenROAD.Floorplan,
       Odb.CheckMacroAntennaProperties,
       Odb.SetPowerConnections,
-      OpenROAD.GlobalPlacementSkipIO,
-      OpenROAD.IOPlacement,
-      #  OpenROAD.UnplaceAll,
       Odb.CustomIOPlacement,
+      OpenROAD.IOPlacement,
       Odb.ApplyDEFTemplate,
+      OpenROAD.GlobalPlacementSkipIO,
       # Call TritonMacroPlace
       OpenROAD.TritonMacroPlacer,
       # Unplace all stdcells again

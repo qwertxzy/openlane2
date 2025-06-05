@@ -322,10 +322,13 @@ class OpenROADStep(TclStep):
 
     def get_command(self) -> List[str]:
         metrics_path = os.path.join(self.step_dir, "or_metrics_out.json")
+        # TODO: thread count as a config var?
         return [
             "openroad",
             "-exit",
             "-no_splash",
+            "-threads",
+            "max",
             "-metrics",
             metrics_path,
             self.get_script_path(),
