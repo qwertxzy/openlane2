@@ -19,6 +19,8 @@ source $::env(SCRIPTS_DIR)/openroad/common/set_power_nets.tcl
 
 # load the grid definitions
 read_pdn_cfg
+# Also source the pdn cfg file before running pdngen
+source $::env(FP_PDN_CFG)
 
 set arg_list [list]
 if { $::env(FP_PDN_SKIPTRIM) } {

@@ -38,7 +38,7 @@ slpp_all/
 htmlcov*/
 prof/
 sandbox/
-/designs
+/designs/runs
 node_modules/
 yarn.lock
 package.json

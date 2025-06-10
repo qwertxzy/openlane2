@@ -148,7 +148,6 @@ class HierRTLMP(SequentialFlow):
       Odb.ApplyDEFTemplate,
       # Call Hier-RTLMP
       OpenROAD.HierarchicalMacroPlacer,
-      OpenROAD.UnplaceStdCells,
       OpenROAD.CutRows,
       OpenROAD.TapEndcapInsertion,
       Odb.AddPDNObstructions,
@@ -238,8 +237,8 @@ class LegalizeMP(SequentialFlow):
       OpenROAD.Floorplan,
       Odb.CheckMacroAntennaProperties,
       Odb.SetPowerConnections,
-      OpenROAD.IOPlacement,
       Odb.CustomIOPlacement,
+      OpenROAD.IOPlacement,
       Odb.ApplyDEFTemplate,
       # Do a full fledged global placement here
       OpenROAD.GlobalPlacement,
